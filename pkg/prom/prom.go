@@ -16,13 +16,11 @@ func NewMetricsInterceptor() connect.UnaryInterceptorFunc {
 			streamType := req.Spec().StreamType.String()
 
 			// Measure Request Size
-			var requestSize int
 			if req != nil {
 				if msg, ok := req.Any().(proto.Message); ok {
-					requestSize = proto.Size(msg)
+					TotalRequestBytesCounter.WithLabelValues(streamType, service, method).Add(float64(proto.Size(msg)))
 				}
 			}
-			TotalRequestBytesCounter.WithLabelValues(streamType, service, method).Add(float64(requestSize))
 
 			// Request started
 			start := time.Now()
@@ -38,12 +36,10 @@ func NewMetricsInterceptor() connect.UnaryInterceptorFunc {
 			RequestLatencySecondsHistogram.WithLabelValues(streamType, service, method, code).Observe(elapsedSeconds)
 
 			// Measure response size
-			var responseSize int
 			if err == nil {
 				if msg, ok := res.Any().(proto.Message); ok {
-					responseSize = proto.Size(msg)
+					TotalResponseBytesCounter.WithLabelValues(streamType, service, method).Add(float64(proto.Size(msg)))
 				}
-				TotalResponseBytesCounter.WithLabelValues(streamType, service, method).Add(float64(responseSize))
 			}
 
 			return res, err
