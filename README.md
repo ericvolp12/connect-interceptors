@@ -3,7 +3,9 @@ A library of interceptors for ConnectRPC that I've found handy
 
 ## Interceptors
 
-- `pkg/retry` - An interceptor that allows you to retry RPCs that fail with specific error conditions. Supports custom backoff strategies and custom functions for parsing errors to determine if you should retry.
+- `pkg/retry` - An interceptor that allows you to retry RPCs that fail with specific error conditions.
+    - Supports custom backoff strategies and custom functions for parsing errors to determine if you should retry.
+    - Defaults to a 1 second backoff, 10 retry maximum, and automatic retries on connection errors.
 
 ## Using an Interceptor
 
