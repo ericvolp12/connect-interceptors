@@ -72,7 +72,10 @@ func ExpBackoff(opts ...backoff.ExponentialBackOffOpts) func() time.Duration {
 
 // NewRetryInterceptor returns a new retry interceptor.
 func NewRetryInterceptor(logger *slog.Logger, conf *RetryConfig) connect.UnaryInterceptorFunc {
-	logger = logger.With("interceptor", "retry-interceptor")
+	if logger != nil {
+		logger = logger.With("interceptor", "retry-interceptor")
+	}
+
 	if conf == nil {
 		conf = DefaultRetryConfig()
 	}
@@ -94,17 +97,23 @@ func NewRetryInterceptor(logger *slog.Logger, conf *RetryConfig) connect.UnaryIn
 				if !conf.IsRetryable(err) {
 					return nil, err
 				}
-				logger.Warn("RPC request failed", "name", name, "attempt", attempt, "elapsed_us", elapsedMicros, "err", err)
+				if logger != nil {
+					logger.Warn("RPC request failed", "name", name, "attempt", attempt, "elapsed_us", elapsedMicros, "err", err)
+				}
 
 				// Set max attempts to <= 0 to retry indefinitely.
 				if conf.MaxAttempts > 0 && attempt >= conf.MaxAttempts {
-					logger.Warn("RPC request failed after max attempts", "name", name, "max_attempts", conf.MaxAttempts, "elapsed_us", elapsedMicros, "err", err)
+					if logger != nil {
+						logger.Warn("RPC request failed after max attempts", "name", name, "max_attempts", conf.MaxAttempts, "elapsed_us", elapsedMicros, "err", err)
+					}
 					return nil, err
 				}
 
 				sleepTime := nextBackoff()
 				if sleepTime == backoff.Stop {
-					logger.Warn("RPC request failed after max backoff", "name", name, "elapsed_us", elapsedMicros, "err", err)
+					if logger != nil {
+						logger.Warn("RPC request failed after max backoff", "name", name, "elapsed_us", elapsedMicros, "err", err)
+					}
 					return nil, err
 				}
 				time.Sleep(sleepTime)
