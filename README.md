@@ -6,6 +6,9 @@ A library of interceptors for ConnectRPC that I've found handy
 - `pkg/retry` - An interceptor that allows you to retry RPCs that fail with specific error conditions.
     - Supports custom backoff strategies and custom functions for parsing errors to determine if you should retry.
     - Defaults to a 1 second backoff, 10 retry maximum, and automatic retries on connection errors.
+- `pkg/prom` - An interceptor that adds some prometheus metrics to your RPCs to track latencies and request throughput.
+    - Make sure to call `RegisterMetrics(registry)` with your prometheus registerer if you're not using the default registerer (if you are, promauto will take care of it).
+    - Feel free to fork this one and tune the buckets or add additional metrics for your service.
 
 ## Using an Interceptor
 
